@@ -19,13 +19,13 @@ export default function Home() {
   // Database'dan tasklarani yuklash
   const fetchTasks = async () => {
     try {
-      const response = await fetch('/api/tasks');
+      const response = await fetch("/api/tasks");
       if (response.ok) {
         const data = await response.json();
         setTasks(data);
       }
     } catch (error) {
-      console.error('Error fetching tasks:', error);
+      console.error("Error fetching tasks:", error);
     }
   };
 
@@ -37,56 +37,60 @@ export default function Home() {
   // Yangi task qo'shish yoki mavjudini yangilash
   const addTask = async () => {
     if (!input.trim()) return;
-    
+
     setLoading(true);
-    
+
     try {
       if (editingTask) {
         // Task yangilash
-        console.log('Updating task:', editingTask.id, 'with text:', input); // Debug
-        
+        console.log("Updating task:", editingTask.id, "with text:", input); // Debug
+
         const response = await fetch(`/api/tasks/${editingTask.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: input })
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: input }),
         });
-        
-        console.log('Update response status:', response.status); // Debug
-        
+
+        console.log("Update response status:", response.status); // Debug
+
         if (response.ok) {
           await fetchTasks(); // Ma'lumotlarni qayta yuklash
           setEditingTask(null);
-          console.log('Task updated successfully'); // Debug
+          console.log("Task updated successfully"); // Debug
         } else {
           const errorData = await response.json();
-          console.error('Update failed:', errorData);
-          alert('Taskni yangilashda xatolik yuz berdi');
+          console.error("Update failed:", errorData);
+          alert("Taskni yangilashda xatolik yuz berdi");
         }
       } else {
         // Yangi task qo'shish
-        console.log('Adding new task:', input); // Debug
-        
-        const response = await fetch('/api/tasks', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: input })
+        console.log("Adding new task:", input); // Debug
+
+        const response = await fetch("/api/tasks", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: input }),
         });
-        
-        console.log('Add response status:', response.status); // Debug
+
+        console.log("Add response status:", response.status); // Debug
         const responseData = await response.json();
-        console.log('Add response data:', responseData); // Debug
-        
+        console.log("Add response data:", responseData); // Debug
+
         if (response.ok) {
           await fetchTasks(); // Ma'lumotlarni qayta yuklash
-          console.log('Task added successfully'); // Debug
+          console.log("Task added successfully"); // Debug
         } else {
-          console.error('Add failed:', responseData);
-          alert(`Taskni qo'shishda xatolik: ${responseData.error || 'Unknown error'}`);
+          console.error("Add failed:", responseData);
+          alert(
+            `Taskni qo'shishda xatolik: ${
+              responseData.error || "Unknown error"
+            }`
+          );
         }
       }
       setInput("");
     } catch (error) {
-      console.error('Error saving task:', error);
+      console.error("Error saving task:", error);
     } finally {
       setLoading(false);
     }
@@ -95,55 +99,55 @@ export default function Home() {
   // Taskni o'chirish
   const deleteTask = async (id: number) => {
     try {
-      console.log('Deleting task with ID:', id); // Debug
-      
+      console.log("Deleting task with ID:", id); // Debug
+
       const response = await fetch(`/api/tasks/${id}`, {
-        method: 'DELETE'
+        method: "DELETE",
       });
-      
-      console.log('Delete response status:', response.status); // Debug
-      
+
+      console.log("Delete response status:", response.status); // Debug
+
       if (response.ok) {
         await fetchTasks(); // Ma'lumotlarni qayta yuklash
-        console.log('Task deleted successfully'); // Debug
+        console.log("Task deleted successfully"); // Debug
       } else {
         const errorData = await response.json();
-        console.error('Delete failed:', errorData);
-        alert('Taskni o\'chirishda xatolik yuz berdi');
+        console.error("Delete failed:", errorData);
+        alert("Taskni o'chirishda xatolik yuz berdi");
       }
     } catch (error) {
-      console.error('Error deleting task:', error);
-      alert('Taskni o\'chirishda xatolik yuz berdi');
+      console.error("Error deleting task:", error);
+      alert("Taskni o'chirishda xatolik yuz berdi");
     }
   };
 
   // Taskni bajarilgan/bajarilmagan qilish
   const toggleTask = async (id: number) => {
-    const task = tasks.find(t => t.id === id);
+    const task = tasks.find((t) => t.id === id);
     if (!task) return;
 
     try {
-      console.log('Toggling task:', id, 'to:', !task.completed); // Debug
-      
+      console.log("Toggling task:", id, "to:", !task.completed); // Debug
+
       const response = await fetch(`/api/tasks/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ completed: !task.completed })
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ completed: !task.completed }),
       });
-      
-      console.log('Toggle response status:', response.status); // Debug
-      
+
+      console.log("Toggle response status:", response.status); // Debug
+
       if (response.ok) {
         await fetchTasks(); // Ma'lumotlarni qayta yuklash
-        console.log('Task toggled successfully'); // Debug
+        console.log("Task toggled successfully"); // Debug
       } else {
         const errorData = await response.json();
-        console.error('Toggle failed:', errorData);
-        alert('Task holatini o\'zgartirishda xatolik yuz berdi');
+        console.error("Toggle failed:", errorData);
+        alert("Task holatini o'zgartirishda xatolik yuz berdi");
       }
     } catch (error) {
-      console.error('Error toggling task:', error);
-      alert('Task holatini o\'zgartirishda xatolik yuz berdi');
+      console.error("Error toggling task:", error);
+      alert("Task holatini o'zgartirishda xatolik yuz berdi");
     }
   };
 
@@ -156,22 +160,24 @@ export default function Home() {
   // Barcha tasklarani tozalash
   const clearAllTasks = async () => {
     if (tasks.length === 0) return;
-    
+
     try {
       // Har bir taskni alohida o'chirish (bulk delete yo'q)
       for (const task of tasks) {
-        await fetch(`/api/tasks/${task.id}`, { method: 'DELETE' });
+        await fetch(`/api/tasks/${task.id}`, { method: "DELETE" });
       }
       await fetchTasks(); // Ma'lumotlarni qayta yuklash
     } catch (error) {
-      console.error('Error clearing tasks:', error);
+      console.error("Error clearing tasks:", error);
     }
   };
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
       <div className="bg-white shadow-md rounded-2xl p-6 w-full max-w-lg">
-        <h1 className="text-2xl font-bold mb-4 text-center text-black">📝 To-Do List</h1>
+        <h1 className="text-2xl font-bold mb-4 text-center text-black">
+          📝 To-Do List
+        </h1>
 
         {/* Input + Button */}
         <div className="flex gap-2 mb-4">
@@ -181,7 +187,7 @@ export default function Home() {
             onChange={(e) => setInput(e.target.value)}
             placeholder="Yangi vazifa..."
             className="flex-1 border p-2 rounded-lg text-black"
-            onKeyPress={(e) => e.key === 'Enter' && !loading && addTask()}
+            onKeyPress={(e) => e.key === "Enter" && !loading && addTask()}
           />
           <button
             onClick={addTask}
@@ -252,7 +258,7 @@ export default function Home() {
         {/* Empty state */}
         {tasks.length === 0 && (
           <p className="text-center text-gray-500 mt-4">
-            Hech qanday vazifa yo’q. Yangi vazifa qo'shing!
+            Hech qanday vazifa yo&apos;q. Yangi vazifa qo&apos;shing!
           </p>
         )}
       </div>
