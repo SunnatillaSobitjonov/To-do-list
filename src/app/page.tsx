@@ -252,7 +252,7 @@ export default function Home() {
         {/* Empty state */}
         {tasks.length === 0 && (
           <p className="text-center text-gray-500 mt-4">
-            Hech qanday vazifa yo'q. Yangi vazifa qo'shing!
+            Hech qanday vazifa yo’q. Yangi vazifa qo'shing!
           </p>
         )}
       </div>
