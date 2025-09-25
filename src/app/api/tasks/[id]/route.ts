@@ -1,11 +1,11 @@
 // src/app/api/tasks/[id]/route.ts
-import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
-// PUT - taskni update qilish
+// PUT - task update
 export async function PUT(
   request: NextRequest,
-  context: { params: any }
+  context: { params: { id: string } }
 ) {
   try {
     const taskId = parseInt(context.params.id, 10);
@@ -30,26 +30,28 @@ export async function PUT(
   }
 }
 
-// DELETE - taskni o‘chirish
+// DELETE - task delete
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Record<string, string> }
+  context: { params: { id: string } }
 ) {
   try {
-    const taskId = parseInt(params.id)
+    const taskId = parseInt(context.params.id, 10);
 
     if (isNaN(taskId)) {
-      return NextResponse.json({ error: 'Invalid task ID' }, { status: 400 })
+      return NextResponse.json({ error: "Invalid task ID" }, { status: 400 });
     }
 
-    await prisma.task.delete({ where: { id: taskId } })
+    await prisma.task.delete({
+      where: { id: taskId },
+    });
 
-    return NextResponse.json({ message: 'Task deleted successfully' })
+    return NextResponse.json({ message: "Task deleted successfully" });
   } catch (error) {
-    console.error('DELETE Error:', error)
+    console.error("DELETE Error:", error);
     return NextResponse.json(
-      { error: 'Failed to delete task' },
+      { error: "Failed to delete task" },
       { status: 500 }
-    )
+    );
   }
 }
