@@ -5,28 +5,28 @@ import { prisma } from '@/lib/prisma'
 // PUT - taskni update qilish
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Record<string, string> }
+  context: { params: any }
 ) {
   try {
-    const taskId = parseInt(params.id)
-    const body = await request.json()
+    const taskId = parseInt(context.params.id, 10);
+    const body = await request.json();
 
     if (isNaN(taskId)) {
-      return NextResponse.json({ error: 'Invalid task ID' }, { status: 400 })
+      return NextResponse.json({ error: "Invalid task ID" }, { status: 400 });
     }
 
     const task = await prisma.task.update({
       where: { id: taskId },
       data: body,
-    })
+    });
 
-    return NextResponse.json(task)
+    return NextResponse.json(task);
   } catch (error) {
-    console.error('PUT Error:', error)
+    console.error("PUT Error:", error);
     return NextResponse.json(
-      { error: 'Failed to update task' },
+      { error: "Failed to update task" },
       { status: 500 }
-    )
+    );
   }
 }
 
