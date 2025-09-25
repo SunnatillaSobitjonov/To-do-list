@@ -6,57 +6,166 @@ type Task = {
   id: number;
   text: string;
   completed: boolean;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export default function Home() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [input, setInput] = useState("");
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  // LocalStorage'dan yuklash
-  useEffect(() => {
-    const saved = localStorage.getItem("tasks");
-    if (saved) {
-      setTasks(JSON.parse(saved));
+  // Database'dan tasklarani yuklash
+  const fetchTasks = async () => {
+    try {
+      const response = await fetch('/api/tasks');
+      if (response.ok) {
+        const data = await response.json();
+        setTasks(data);
+      }
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
     }
-  }, []);
-
-  // LocalStorage'ga saqlash
-  useEffect(() => {
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-  }, [tasks]);
-
-  // Yangi task qo‘shish
-  const addTask = () => {
-    if (!input.trim()) return;
-    if (editingTask) {
-      // edit rejimi
-      setTasks(
-        tasks.map((t) => (t.id === editingTask.id ? { ...t, text: input } : t))
-      );
-      setEditingTask(null);
-    } else {
-      setTasks([...tasks, { id: Date.now(), text: input, completed: false }]);
-    }
-    setInput("");
   };
 
-  // Taskni o‘chirish
-  const deleteTask = (id: number) => {
-    setTasks(tasks.filter((t) => t.id !== id));
+  // Component yuklanganda tasklarani olish
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
+  // Yangi task qo'shish yoki mavjudini yangilash
+  const addTask = async () => {
+    if (!input.trim()) return;
+    
+    setLoading(true);
+    
+    try {
+      if (editingTask) {
+        // Task yangilash
+        console.log('Updating task:', editingTask.id, 'with text:', input); // Debug
+        
+        const response = await fetch(`/api/tasks/${editingTask.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: input })
+        });
+        
+        console.log('Update response status:', response.status); // Debug
+        
+        if (response.ok) {
+          await fetchTasks(); // Ma'lumotlarni qayta yuklash
+          setEditingTask(null);
+          console.log('Task updated successfully'); // Debug
+        } else {
+          const errorData = await response.json();
+          console.error('Update failed:', errorData);
+          alert('Taskni yangilashda xatolik yuz berdi');
+        }
+      } else {
+        // Yangi task qo'shish
+        console.log('Adding new task:', input); // Debug
+        
+        const response = await fetch('/api/tasks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: input })
+        });
+        
+        console.log('Add response status:', response.status); // Debug
+        const responseData = await response.json();
+        console.log('Add response data:', responseData); // Debug
+        
+        if (response.ok) {
+          await fetchTasks(); // Ma'lumotlarni qayta yuklash
+          console.log('Task added successfully'); // Debug
+        } else {
+          console.error('Add failed:', responseData);
+          alert(`Taskni qo'shishda xatolik: ${responseData.error || 'Unknown error'}`);
+        }
+      }
+      setInput("");
+    } catch (error) {
+      console.error('Error saving task:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Taskni o'chirish
+  const deleteTask = async (id: number) => {
+    try {
+      console.log('Deleting task with ID:', id); // Debug
+      
+      const response = await fetch(`/api/tasks/${id}`, {
+        method: 'DELETE'
+      });
+      
+      console.log('Delete response status:', response.status); // Debug
+      
+      if (response.ok) {
+        await fetchTasks(); // Ma'lumotlarni qayta yuklash
+        console.log('Task deleted successfully'); // Debug
+      } else {
+        const errorData = await response.json();
+        console.error('Delete failed:', errorData);
+        alert('Taskni o\'chirishda xatolik yuz berdi');
+      }
+    } catch (error) {
+      console.error('Error deleting task:', error);
+      alert('Taskni o\'chirishda xatolik yuz berdi');
+    }
   };
 
   // Taskni bajarilgan/bajarilmagan qilish
-  const toggleTask = (id: number) => {
-    setTasks(
-      tasks.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t))
-    );
+  const toggleTask = async (id: number) => {
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+
+    try {
+      console.log('Toggling task:', id, 'to:', !task.completed); // Debug
+      
+      const response = await fetch(`/api/tasks/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ completed: !task.completed })
+      });
+      
+      console.log('Toggle response status:', response.status); // Debug
+      
+      if (response.ok) {
+        await fetchTasks(); // Ma'lumotlarni qayta yuklash
+        console.log('Task toggled successfully'); // Debug
+      } else {
+        const errorData = await response.json();
+        console.error('Toggle failed:', errorData);
+        alert('Task holatini o\'zgartirishda xatolik yuz berdi');
+      }
+    } catch (error) {
+      console.error('Error toggling task:', error);
+      alert('Task holatini o\'zgartirishda xatolik yuz berdi');
+    }
   };
 
   // Taskni edit qilish
   const editTask = (task: Task) => {
     setInput(task.text);
     setEditingTask(task);
+  };
+
+  // Barcha tasklarani tozalash
+  const clearAllTasks = async () => {
+    if (tasks.length === 0) return;
+    
+    try {
+      // Har bir taskni alohida o'chirish (bulk delete yo'q)
+      for (const task of tasks) {
+        await fetch(`/api/tasks/${task.id}`, { method: 'DELETE' });
+      }
+      await fetchTasks(); // Ma'lumotlarni qayta yuklash
+    } catch (error) {
+      console.error('Error clearing tasks:', error);
+    }
   };
 
   return (
@@ -72,14 +181,29 @@ export default function Home() {
             onChange={(e) => setInput(e.target.value)}
             placeholder="Yangi vazifa..."
             className="flex-1 border p-2 rounded-lg text-black"
+            onKeyPress={(e) => e.key === 'Enter' && !loading && addTask()}
           />
           <button
             onClick={addTask}
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+            disabled={loading}
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 disabled:bg-blue-300"
           >
-            {editingTask ? "Update" : "Add"}
+            {loading ? "..." : editingTask ? "Update" : "Add"}
           </button>
         </div>
+
+        {/* Cancel edit button */}
+        {editingTask && (
+          <button
+            onClick={() => {
+              setEditingTask(null);
+              setInput("");
+            }}
+            className="mb-4 text-sm text-gray-600 hover:text-red-600"
+          >
+            Cancel Edit
+          </button>
+        )}
 
         {/* Task list */}
         <ul className="space-y-2">
@@ -100,6 +224,7 @@ export default function Home() {
                 <button
                   onClick={() => editTask(task)}
                   className="text-yellow-600 hover:text-yellow-800"
+                  disabled={editingTask?.id === task.id}
                 >
                   ✏️
                 </button>
@@ -117,11 +242,18 @@ export default function Home() {
         {/* Clear all */}
         {tasks.length > 0 && (
           <button
-            onClick={() => setTasks([])}
+            onClick={clearAllTasks}
             className="mt-4 text-sm text-gray-600 hover:text-red-600"
           >
-            Clear all
+            Clear all ({tasks.length})
           </button>
+        )}
+
+        {/* Empty state */}
+        {tasks.length === 0 && (
+          <p className="text-center text-gray-500 mt-4">
+            Hech qanday vazifa yo'q. Yangi vazifa qo'shing!
+          </p>
         )}
       </div>
     </main>
