@@ -5,22 +5,16 @@ import { prisma } from '@/lib/prisma'
 // PUT - taskni update qilish
 export async function PUT(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = context.params
-    const taskId = parseInt(id)
+    const taskId = parseInt(params.id)
     const body = await request.json()
-    
-    console.log('PUT request - ID:', taskId, 'Body:', body) // Debug uchun
-    
+
     if (isNaN(taskId)) {
-      return NextResponse.json(
-        { error: 'Invalid task ID' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Invalid task ID' }, { status: 400 })
     }
-    
+
     const task = await prisma.task.update({
       where: { id: taskId },
       data: body
@@ -42,17 +36,17 @@ export async function DELETE(
   { params }: { params: { id: string } } // Promise'siz
 ) {
   try {
-const taskId = parseInt(params.id)
-    
+    const taskId = parseInt(params.id)
+
     console.log('DELETE request - ID:', taskId) // Debug uchun
-    
+
     if (isNaN(taskId)) {
       return NextResponse.json(
         { error: 'Invalid task ID' },
         { status: 400 }
       )
     }
-    
+
     await prisma.task.delete({
       where: { id: taskId }
     })
