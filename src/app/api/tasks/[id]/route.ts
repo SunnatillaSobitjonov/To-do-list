@@ -5,11 +5,11 @@ import { prisma } from '@/lib/prisma'
 // PUT - taskni update qilish
 export async function PUT(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  context: { params: { id: string } }
 ) {
   try {
-    const params = await context.params // To'g'ri usul
-    const taskId = parseInt(params.id)
+    const { id } = context.params
+    const taskId = parseInt(id)
     const body = await request.json()
     
     console.log('PUT request - ID:', taskId, 'Body:', body) // Debug uchun
