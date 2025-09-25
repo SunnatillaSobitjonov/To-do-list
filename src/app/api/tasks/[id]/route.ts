@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma'
 // PUT - taskni update qilish
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Record<string, string> }
 ) {
   try {
     const taskId = parseInt(params.id)
@@ -17,12 +17,12 @@ export async function PUT(
 
     const task = await prisma.task.update({
       where: { id: taskId },
-      data: body
+      data: body,
     })
 
     return NextResponse.json(task)
   } catch (error) {
-    console.error('PUT Error:', error) // Debug uchun
+    console.error('PUT Error:', error)
     return NextResponse.json(
       { error: 'Failed to update task' },
       { status: 500 }
@@ -30,30 +30,23 @@ export async function PUT(
   }
 }
 
-// DELETE - taskni o'chirish
+// DELETE - taskni o‘chirish
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } } // Promise'siz
+  { params }: { params: Record<string, string> }
 ) {
   try {
     const taskId = parseInt(params.id)
 
-    console.log('DELETE request - ID:', taskId) // Debug uchun
-
     if (isNaN(taskId)) {
-      return NextResponse.json(
-        { error: 'Invalid task ID' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Invalid task ID' }, { status: 400 })
     }
 
-    await prisma.task.delete({
-      where: { id: taskId }
-    })
+    await prisma.task.delete({ where: { id: taskId } })
 
     return NextResponse.json({ message: 'Task deleted successfully' })
   } catch (error) {
-    console.error('DELETE Error:', error) // Debug uchun
+    console.error('DELETE Error:', error)
     return NextResponse.json(
       { error: 'Failed to delete task' },
       { status: 500 }
