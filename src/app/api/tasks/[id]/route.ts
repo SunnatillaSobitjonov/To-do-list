@@ -2,13 +2,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-// PUT - task update
+// PUT - update task
 export async function PUT(
   request: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> } // <-- Promise bo'lishi kerak
 ) {
   try {
-    const taskId = parseInt(context.params.id, 10);
+    const { id } = await context.params; // Promise'dan chiqarib olish
+    const taskId = parseInt(id, 10);
     const body = await request.json();
 
     if (isNaN(taskId)) {
@@ -30,13 +31,14 @@ export async function PUT(
   }
 }
 
-// DELETE - task delete
+// DELETE - delete task
 export async function DELETE(
   request: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> } // <-- bu yerda ham Promise
 ) {
   try {
-    const taskId = parseInt(context.params.id, 10);
+    const { id } = await context.params;
+    const taskId = parseInt(id, 10);
 
     if (isNaN(taskId)) {
       return NextResponse.json({ error: "Invalid task ID" }, { status: 400 });
