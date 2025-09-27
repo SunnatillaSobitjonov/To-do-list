@@ -1,4 +1,4 @@
-name: CI
+name: CI/CD Pipeline
 
 on:
   push:
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -22,12 +22,17 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run lint
+      - name: Run Linter
         run: npm run lint
 
-      - name: Run build
+      - name: Run Build
         run: npm run build
 
-      # Agar testlaring bo‘lsa
-      # - name: Run tests
-      #   run: npm test
+      - name: TypeScript Check
+        run: npx tsc --noEmit
+
+      - name: Prisma Migrate Check
+        run: npx prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma
+
+      - name: Prettier Check
+        run: npx prettier --check .
