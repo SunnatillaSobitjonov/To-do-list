@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 // PUT - update task
 export async function PUT(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> } // <-- Promise bo'lishi kerak
+  context: { params: Promise<{ id: string }> }, // <-- Promise bo'lishi kerak
 ) {
   try {
     const { id } = await context.params; // Promise'dan chiqarib olish
@@ -26,7 +26,7 @@ export async function PUT(
     console.error("PUT Error:", error);
     return NextResponse.json(
       { error: "Failed to update task" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -34,7 +34,7 @@ export async function PUT(
 // DELETE - delete task
 export async function DELETE(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> } // <-- bu yerda ham Promise
+  context: { params: Promise<{ id: string }> }, // <-- bu yerda ham Promise
 ) {
   try {
     const { id } = await context.params;
@@ -53,7 +53,7 @@ export async function DELETE(
     console.error("DELETE Error:", error);
     return NextResponse.json(
       { error: "Failed to delete task" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

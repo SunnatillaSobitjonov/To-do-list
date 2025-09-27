@@ -84,7 +84,7 @@ export default function Home() {
           alert(
             `Taskni qo'shishda xatolik: ${
               responseData.error || "Unknown error"
-            }`
+            }`,
           );
         }
       }
